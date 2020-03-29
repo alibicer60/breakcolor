@@ -1,0 +1,24 @@
+using UnityEngine;
+
+public class CemberKontrol : MonoBehaviour
+{
+	public bool solaDon;
+
+	public float donmeHizi;
+
+	private void Start()
+	{
+	}
+
+	private void Update()
+	{
+		if (solaDon)
+		{
+			base.transform.Rotate(0f, 0f, donmeHizi * Time.deltaTime);
+		}
+		else
+		{
+			base.transform.Rotate(0f, 0f, (0f - donmeHizi) * Time.deltaTime);
+		}
+	}
+}

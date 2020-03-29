@@ -1,0 +1,56 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class OyunYonetici : MonoBehaviour
+{
+	[SerializeField]
+	private GameObject Silah;
+
+	[SerializeField]
+	private float toplamDaire;
+
+	public float BreakCount;
+
+	[SerializeField]
+	private GameObject LevelDerece;
+
+	private void Update()
+	{
+		if (Input.GetButtonDown("Fire2"))
+		{
+			SilahOlustur();
+		}
+	}
+
+	public void LevelDereceKontrol()
+	{
+		LevelData levelData = new LevelData(SceneManager.GetActiveScene().name);
+		if (levelData.BestTime != 0f)
+		{
+			if (levelData.BestTime < levelData.GoldTime)
+			{
+				LevelDerece.transform.GetChild(3).GetComponent<Image>().enabled = true;
+				LevelDerece.transform.GetChild(4).GetComponent<Image>().enabled = true;
+				LevelDerece.transform.GetChild(5).GetComponent<Image>().enabled = true;
+			}
+			else if (levelData.BestTime < levelData.SilverTime)
+			{
+				LevelDerece.transform.GetChild(3).GetComponent<Image>().enabled = true;
+				LevelDerece.transform.GetChild(4).GetComponent<Image>().enabled = true;
+				LevelDerece.transform.GetChild(5).GetComponent<Image>().enabled = false;
+			}
+			else
+			{
+				LevelDerece.transform.GetChild(4).GetComponent<Image>().enabled = true;
+				LevelDerece.transform.GetChild(4).GetComponent<Image>().enabled = false;
+				LevelDerece.transform.GetChild(5).GetComponent<Image>().enabled = false;
+			}
+		}
+	}
+
+	public void SilahOlustur()
+	{
+		Object.Instantiate(Silah, base.transform.position, base.transform.rotation);
+	}
+}

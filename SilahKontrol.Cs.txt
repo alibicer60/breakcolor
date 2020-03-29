@@ -1,0 +1,154 @@
+using EZCameraShake;
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+public class SilahKontrol : MonoBehaviour
+{
+	private Rigidbody2D fizik;
+
+	[SerializeField]
+	private Vector3 vec;
+
+	[SerializeField]
+	private float mizrakHizi = 5f;
+
+	public string mevcutRenk;
+
+	private Color topunRengi;
+
+	[SerializeField]
+	private Color aColor;
+
+	[SerializeField]
+	private Color bColor;
+
+	[SerializeField]
+	private Color cColor;
+
+	[SerializeField]
+	private Color dColor;
+
+	private OyunYonetici yonet;
+
+	private void Awake()
+	{
+		if (Daireler.aCount != 0)
+		{
+			aColor = GameObject.FindGameObjectWithTag("A").GetComponent<SpriteRenderer>().color;
+		}
+		if (Daireler.bCount != 0)
+		{
+			bColor = GameObject.FindGameObjectWithTag("B").GetComponent<SpriteRenderer>().color;
+		}
+		if (Daireler.cCount != 0)
+		{
+			cColor = GameObject.FindGameObjectWithTag("C").GetComponent<SpriteRenderer>().color;
+		}
+		if (Daireler.dCount != 0)
+		{
+			dColor = GameObject.FindGameObjectWithTag("D").GetComponent<SpriteRenderer>().color;
+		}
+	}
+
+	private void Start()
+	{
+		RandomRenk();
+		fizik = GetComponent<Rigidbody2D>();
+		yonet = UnityEngine.Object.FindObjectOfType<OyunYonetici>();
+	}
+
+	private void Update()
+	{
+		SilahAtes();
+	}
+
+	public void SilahAtes()
+	{
+		if (Input.GetButtonDown("Fire1") && EventSystem.current.currentSelectedGameObject == null)
+		{
+			vec = new Vector3(0f, 200f, 0f) * mizrakHizi;
+			fizik.AddForce(vec);
+			SoundManager.PlaySound("at");
+		}
+	}
+
+	private void OnTriggerEnter2D(Collider2D collision)
+	{
+		if (collision.tag != mevcutRenk)
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+			LevelManager.Instance.GameOver();
+		}
+		if (collision.tag == mevcutRenk)
+		{
+			if (mevcutRenk == "A")
+			{
+				Daireler.aCount--;
+			}
+			if (mevcutRenk == "B")
+			{
+				Daireler.bCount--;
+			}
+			if (mevcutRenk == "C")
+			{
+				Daireler.cCount--;
+			}
+			if (mevcutRenk == "D")
+			{
+				Daireler.dCount--;
+			}
+			if (Daireler.aCount == 0 && Daireler.bCount == 0 && Daireler.cCount == 0 && Daireler.dCount == 0)
+			{
+				LevelManager.Instance.Victory();
+			}
+			else
+			{
+				yonet.SilahOlustur();
+			}
+			UnityEngine.Object.Destroy(collision.gameObject);
+			UnityEngine.Object.Destroy(base.gameObject);
+			SoundManager.PlaySound("tut");
+			yonet.BreakCount += 1f;
+			CameraShaker.Instance.ShakeOnce(2f, 2f, 1f, 1f);
+		}
+	}
+
+	private void OnCollisionEnter2D(Collision2D col)
+	{
+		if (col.gameObject.tag == "duvar")
+		{
+			yonet.SilahOlustur();
+		}
+		UnityEngine.Object.Destroy(base.gameObject);
+	}
+
+	private void RandomRenk()
+	{
+		int num = UnityEngine.Random.Range(0, 100);
+		if (Daireler.aCount != 0 && num > 0 && num < 35)
+		{
+			mevcutRenk = "A";
+			topunRengi = aColor;
+		}
+		else if (Daireler.bCount != 0 && num > 35 && num < 70)
+		{
+			mevcutRenk = "B";
+			topunRengi = bColor;
+		}
+		else if (Daireler.cCount != 0 && num > 70 && num < 100)
+		{
+			mevcutRenk = "C";
+			topunRengi = cColor;
+		}
+		else if (Daireler.dCount != 0 && num > 70 && num < 100)
+		{
+			mevcutRenk = "D";
+			topunRengi = dColor;
+		}
+		else
+		{
+			RandomRenk();
+		}
+		GetComponent<SpriteRenderer>().color = topunRengi;
+	}
+}

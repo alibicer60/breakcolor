@@ -1,0 +1,206 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class LevelManager : MonoBehaviour
+{
+	private static LevelManager instance;
+
+	private float startTime;
+
+	public float silverTime;
+
+	public float goldTime;
+
+	public int GoldPuan;
+
+	public int SilverPuan;
+
+	public int BronzePuan;
+
+	private OyunYonetici yonet;
+
+	[SerializeField]
+	private Text ActiveLevelText;
+
+	[SerializeField]
+	private Text ActiveLevelText2;
+
+	[SerializeField]
+	private Text ActiveLevelText3;
+
+	[SerializeField]
+	private Text RealCost;
+
+	[SerializeField]
+	private Text RealPuan;
+
+	[SerializeField]
+	private Text anyCoin;
+
+	[SerializeField]
+	private GameObject WinPanel;
+
+	[SerializeField]
+	private GameObject YesNoPanel;
+
+	[SerializeField]
+	private GameObject LosePanel;
+
+	[SerializeField]
+	private int LevelCost;
+
+	[SerializeField]
+	private GameObject winParticle;
+
+	private int winreklamsayac = 1;
+
+	private int losereklamsayac = 1;
+
+	public static LevelManager Instance => instance;
+
+	private void Start()
+	{
+		instance = this;
+		startTime = Time.time;
+		ActiveLevelText.text = SceneManager.GetActiveScene().name + ". Level";
+		ActiveLevelText2.text = SceneManager.GetActiveScene().name + ". Level";
+		ActiveLevelText3.text = SceneManager.GetActiveScene().name + ". Level";
+		yonet = UnityEngine.Object.FindObjectOfType<OyunYonetici>();
+		yonet.SilahOlustur();
+		if (DilKonrol.Instance.dilNo == 1)
+		{
+			anyCoin.text = LevelCost + " coin karsiliginda devam etmek ister misin ?";
+		}
+		if (DilKonrol.Instance.dilNo == 2)
+		{
+			anyCoin.text = "Would you like to continue for " + LevelCost + " coins?";
+		}
+		winreklamsayac = PlayerPrefs.GetInt("winreklamSayaci");
+		winreklamsayac++;
+		PlayerPrefs.SetInt("winreklamSayaci", winreklamsayac);
+		losereklamsayac = PlayerPrefs.GetInt("losereklamSayaci");
+		losereklamsayac++;
+		PlayerPrefs.SetInt("losereklamSayaci", losereklamsayac);
+		UnityEngine.Debug.Log("win sayac " + winreklamsayac);
+		UnityEngine.Debug.Log("lose sayac " + losereklamsayac);
+	}
+
+	private void Update()
+	{
+		RealCost.text = GameManager.Instance.coin.ToString();
+		RealPuan.text = GameManager.Instance.currency.ToString();
+	}
+
+	public void Retry()
+	{
+		DaireleriSýfýrla();
+		Time.timeScale = 1f;
+		SceneManager.LoadScene(int.Parse(SceneManager.GetActiveScene().name));
+	}
+
+	public void ExitMenu()
+	{
+		DaireleriSýfýrla();
+		Time.timeScale = 1f;
+		SceneManager.LoadScene("AnaMenu");
+	}
+
+	public void SonrakiLevel()
+	{
+		Time.timeScale = 1f;
+		DaireleriSýfýrla();
+		SceneManager.LoadScene(int.Parse(SceneManager.GetActiveScene().name) + 1);
+	}
+
+	public void Victory()
+	{
+		float num = Time.time - startTime;
+		if (num < goldTime)
+		{
+			GameManager.Instance.currency += GoldPuan;
+		}
+		else if (num < silverTime)
+		{
+			GameManager.Instance.currency += SilverPuan;
+		}
+		else
+		{
+			GameManager.Instance.currency += BronzePuan;
+		}
+		GameManager.Instance.Save();
+		string empty = string.Empty;
+		LevelData levelData = new LevelData(SceneManager.GetActiveScene().name);
+		empty += ((!(levelData.BestTime > num) && levelData.BestTime != 0f) ? levelData.BestTime.ToString() : num.ToString());
+		empty += '&';
+		empty += silverTime.ToString();
+		empty += '&';
+		empty += goldTime.ToString();
+		PlayerPrefs.SetString(SceneManager.GetActiveScene().name, empty);
+		yonet.LevelDereceKontrol();
+		StartCoroutine(CallWin());
+	}
+
+	private IEnumerator CallWin()
+	{
+		yield return new WaitForSeconds(1f);
+		GameObject effectim = UnityEngine.Object.Instantiate<GameObject>(position: new Vector3(0f, 3f, 0f), original: winParticle, rotation: Quaternion.identity);
+		UnityEngine.Object.Destroy(effectim, 3.5f);
+		SoundManager.PlaySound("win");
+		yield return new WaitForSeconds(2f);
+		WinPanel.SetActive(value: true);
+		int winreklamsayac = PlayerPrefs.GetInt("winreklamSayaci");
+		if (winreklamsayac >= 4)
+		{
+			AdsManager.InsterstitialGoster();
+			PlayerPrefs.SetInt("winreklamSayaci", 0);
+		}
+	}
+
+	public void GameOver()
+	{
+		YesNoPanel.SetActive(value: true);
+		SoundManager.PlaySound("yesno");
+		Time.timeScale = 0f;
+	}
+
+	public void YesExtraGame()
+	{
+		if (GameManager.Instance.coin >= 0)
+		{
+			YesNoPanel.SetActive(value: false);
+			Time.timeScale = 1f;
+			yonet.SilahOlustur();
+			GameManager.Instance.coin -= LevelCost;
+			GameManager.Instance.Save();
+			SoundManager.PlaySound("coin");
+		}
+		else
+		{
+			anyCoin.text = "You don't have enough coins.";
+		}
+	}
+
+	public void NoExtraGame()
+	{
+		Time.timeScale = 0f;
+		int ýnt = PlayerPrefs.GetInt("losereklamSayaci");
+		if (ýnt >= 2)
+		{
+			AdsManager.InsterstitialGoster();
+			PlayerPrefs.SetInt("losereklamSayaci", 0);
+		}
+		YesNoPanel.SetActive(value: false);
+		LosePanel.SetActive(value: true);
+		SoundManager.PlaySound("lose");
+	}
+
+	private void DaireleriSýfýrla()
+	{
+		Daireler.aCount = 0;
+		Daireler.bCount = 0;
+		Daireler.cCount = 0;
+		Daireler.dCount = 0;
+	}
+}

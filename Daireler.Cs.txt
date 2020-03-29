@@ -1,0 +1,66 @@
+using UnityEngine;
+
+public class Daireler : MonoBehaviour
+{
+	public static int aCount;
+
+	public static int bCount;
+
+	public static int cCount;
+
+	public static int dCount;
+
+	public int daireCount;
+
+	private bool isA;
+
+	private bool isB;
+
+	private bool isC;
+
+	private bool isD;
+
+	public GameObject efekt;
+
+	private void Awake()
+	{
+		isA = (base.tag == "A");
+		isB = (base.tag == "B");
+		isC = (base.tag == "C");
+		isD = (base.tag == "D");
+		if (isA)
+		{
+			aCount++;
+		}
+		if (isB)
+		{
+			bCount++;
+		}
+		if (isC)
+		{
+			cCount++;
+		}
+		if (isD)
+		{
+			dCount++;
+		}
+	}
+
+	private void Update()
+	{
+		daireCount = aCount + bCount + cCount + dCount;
+	}
+
+	public void EffectOlurstur()
+	{
+		GameObject gameObject = UnityEngine.Object.Instantiate(efekt, base.gameObject.transform.position, Quaternion.identity);
+		gameObject.transform.GetChild(0).GetComponent<ParticleSystem>().startColor = base.gameObject.GetComponent<SpriteRenderer>().color;
+		gameObject.transform.GetChild(1).GetComponent<ParticleSystem>().startColor = base.gameObject.GetComponent<SpriteRenderer>().color;
+		UnityEngine.Object.Destroy(gameObject, 1.5f);
+	}
+
+	private void OnTriggerEnter2D(Collider2D collision)
+	{
+		EffectOlurstur();
+	}
+}

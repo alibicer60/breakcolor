@@ -1,0 +1,48 @@
+using UnityEngine;
+
+public class GameManager : MonoBehaviour
+{
+	private static GameManager instance;
+
+	public int currency;
+
+	public int coin = 5;
+
+	public static GameManager Instance => instance;
+
+	private void Awake()
+	{
+		if (instance == null)
+		{
+			Object.DontDestroyOnLoad(base.gameObject);
+			instance = this;
+			if (PlayerPrefs.HasKey("Currency"))
+			{
+				currency = PlayerPrefs.GetInt("Currency");
+				coin = PlayerPrefs.GetInt("Coin");
+			}
+			else
+			{
+				Save();
+			}
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
+
+	private void Update()
+	{
+		if (coin <= 0)
+		{
+			coin = 0;
+		}
+	}
+
+	public void Save()
+	{
+		PlayerPrefs.SetInt("Currency", currency);
+		PlayerPrefs.SetInt("Coin", coin);
+	}
+}

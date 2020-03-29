@@ -1,0 +1,256 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class AnaMenu : MonoBehaviour
+{
+	public GameObject levelButtonPref;
+
+	public GameObject levelButtonContainer;
+
+	[SerializeField]
+	private GameObject SoundOnPanel;
+
+	[SerializeField]
+	private GameObject SoundOffPanel;
+
+	public int LevelCount;
+
+	[SerializeField]
+	private Animator animator;
+
+	[SerializeField]
+	private Text PuanCurrencyText;
+
+	[SerializeField]
+	private Text CoinText;
+
+	[SerializeField]
+	private Text ItemQText;
+
+	[SerializeField]
+	private Text toplamLevelText;
+
+	[SerializeField]
+	private Text AcikLevelText;
+
+	public bool nextlevelLocked;
+
+	[SerializeField]
+	private GameObject coinParticle;
+
+	private void Start()
+	{
+		Sprite[] array = Resources.LoadAll<Sprite>("Levels");
+		toplamLevelText.text = "/ " + array.Length.ToString();
+		Sprite[] array2 = array;
+		foreach (Sprite sprite in array2)
+		{
+			GameObject gameObject = UnityEngine.Object.Instantiate(levelButtonPref);
+			gameObject.GetComponent<Image>().sprite = sprite;
+			string sceneName = sprite.name;
+			LevelData levelData = new LevelData(sprite.name);
+			gameObject.transform.GetChild(0).GetComponent<Text>().text = sceneName;
+			gameObject.transform.GetChild(1).GetComponent<Text>().text = ((levelData.BestTime == 0f) ? string.Empty : levelData.BestTime.ToString("f"));
+			gameObject.transform.GetChild(2).GetComponent<Image>().enabled = nextlevelLocked;
+			gameObject.GetComponent<Button>().interactable = !nextlevelLocked;
+			if (levelData.BestTime == 0f)
+			{
+				nextlevelLocked = true;
+			}
+			else if (levelData.BestTime < levelData.GoldTime)
+			{
+				gameObject.transform.GetChild(6).GetComponent<Image>().enabled = true;
+				gameObject.transform.GetChild(7).GetComponent<Image>().enabled = true;
+				gameObject.transform.GetChild(8).GetComponent<Image>().enabled = true;
+				LevelCount++;
+			}
+			else if (levelData.BestTime < levelData.SilverTime)
+			{
+				gameObject.transform.GetChild(6).GetComponent<Image>().enabled = true;
+				gameObject.transform.GetChild(7).GetComponent<Image>().enabled = true;
+				gameObject.transform.GetChild(8).GetComponent<Image>().enabled = false;
+				LevelCount++;
+			}
+			else
+			{
+				LevelCount++;
+				gameObject.transform.GetChild(6).GetComponent<Image>().enabled = true;
+				gameObject.transform.GetChild(7).GetComponent<Image>().enabled = false;
+				gameObject.transform.GetChild(8).GetComponent<Image>().enabled = false;
+			}
+			gameObject.transform.SetParent(levelButtonContainer.transform, worldPositionStays: false);
+			gameObject.GetComponent<Button>().onClick.AddListener(delegate
+			{
+				LoadLevel(sceneName);
+			});
+			int ýnt = PlayerPrefs.GetInt("losereklamSayaci");
+			if (ýnt >= 10)
+			{
+				AdsManager.InsterstitialGoster();
+				PlayerPrefs.SetInt("losereklamSayaci", 0);
+			}
+		}
+	}
+
+	private void LoadLevel(string sceneName)
+	{
+		SceneManager.LoadScene(sceneName);
+	}
+
+	public void ItemA()
+	{
+		int num = 5;
+		if (GameManager.Instance.currency >= num)
+		{
+			GameManager.Instance.currency -= num;
+			GameManager.Instance.coin += 5;
+			GameManager.Instance.Save();
+			ItemQText.fontSize = 50;
+			if (DilKonrol.Instance.dilNo == 1)
+			{
+				ItemQText.text = "5 coin kazandiniz !";
+			}
+			if (DilKonrol.Instance.dilNo == 2)
+			{
+				ItemQText.text = "You have earned 5 coins !";
+			}
+			TextFx();
+			CoinFx();
+			SoundManager.PlaySound("coin");
+		}
+		else
+		{
+			ItemQText.fontSize = 40;
+			if (DilKonrol.Instance.dilNo == 1)
+			{
+				ItemQText.GetComponent<Text>().text = "Yeterli puaniniz yok.";
+			}
+			if (DilKonrol.Instance.dilNo == 2)
+			{
+				ItemQText.text = "You don't have enough points.";
+			}
+			TextFx();
+		}
+	}
+
+	public void ItemB()
+	{
+		int num = 10000;
+		if (GameManager.Instance.currency >= num)
+		{
+			GameManager.Instance.currency -= num;
+			GameManager.Instance.coin += 15;
+			GameManager.Instance.Save();
+			ItemQText.fontSize = 50;
+			if (DilKonrol.Instance.dilNo == 1)
+			{
+				ItemQText.text = "15 coin kazandiniz !";
+			}
+			if (DilKonrol.Instance.dilNo == 2)
+			{
+				ItemQText.GetComponent<Text>().text = "You have earned 15 coins !";
+			}
+			CoinFx();
+			SoundManager.PlaySound("coin");
+			TextFx();
+		}
+		else
+		{
+			ItemQText.fontSize = 40;
+			if (DilKonrol.Instance.dilNo == 1)
+			{
+				ItemQText.text = "Yeterli puaniniz yok.";
+			}
+			if (DilKonrol.Instance.dilNo == 2)
+			{
+				ItemQText.text = "You don't have enough points.";
+			}
+			TextFx();
+		}
+	}
+
+	public void ItemC()
+	{
+		int num = 15000;
+		if (GameManager.Instance.currency >= num)
+		{
+			GameManager.Instance.currency -= num;
+			GameManager.Instance.coin += 25;
+			GameManager.Instance.Save();
+			ItemQText.fontSize = 50;
+			if (DilKonrol.Instance.dilNo == 1)
+			{
+				ItemQText.text = "25 coin kazandiniz !";
+			}
+			if (DilKonrol.Instance.dilNo == 2)
+			{
+				ItemQText.text = "You have earned 25 coins !";
+			}
+			SoundManager.PlaySound("coin");
+			CoinFx();
+			TextFx();
+		}
+		else
+		{
+			ItemQText.fontSize = 50;
+			if (DilKonrol.Instance.dilNo == 1)
+			{
+				ItemQText.text = "Yeterli puaniniz yok.";
+			}
+			if (DilKonrol.Instance.dilNo == 2)
+			{
+				ItemQText.text = "You don't have enough points.";
+			}
+			TextFx();
+		}
+	}
+
+	public void ItemAds()
+	{
+		AdsManager.RewardedReklamGoster(null);
+	}
+
+	private void TextFx()
+	{
+		animator.SetTrigger("ItemQ");
+	}
+
+	private void CoinFx()
+	{
+		GameObject obj = UnityEngine.Object.Instantiate<GameObject>(position: new Vector3(0f, 3.5f, 0f), original: coinParticle, rotation: Quaternion.identity);
+		UnityEngine.Object.Destroy(obj, 3.5f);
+	}
+
+	private void Update()
+	{
+		PuanCurrencyText.text = GameManager.Instance.currency.ToString();
+		CoinText.text = GameManager.Instance.coin.ToString();
+		AcikLevelText.text = LevelCount.ToString();
+		if (SoundManager.Instance.soundValue == 1f)
+		{
+			SoundOnPanel.SetActive(value: true);
+			SoundOffPanel.SetActive(value: false);
+		}
+		else
+		{
+			SoundOnPanel.SetActive(value: false);
+			SoundOffPanel.SetActive(value: true);
+		}
+		AdsManager.BannerGoster();
+	}
+
+	public void SoundON()
+	{
+		SoundManager.Instance.soundValue = 0f;
+		SoundManager.Instance.Save();
+		SoundManager.PlaySound("menu");
+	}
+
+	public void SoundOFF()
+	{
+		SoundManager.Instance.soundValue = 1f;
+		SoundManager.Instance.Save();
+		SoundManager.PlaySound("menu");
+	}
+}

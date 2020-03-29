@@ -1,0 +1,97 @@
+using UnityEngine;
+
+public class SoundManager : MonoBehaviour
+{
+	private static SoundManager instance;
+
+	public static AudioClip atSound;
+
+	public static AudioClip tutSound;
+
+	public static AudioClip winSound;
+
+	public static AudioClip loseSound;
+
+	public static AudioClip yesnoSound;
+
+	public static AudioClip coinSound;
+
+	public static AudioClip menuSound;
+
+	private static AudioSource audiosrc;
+
+	public float soundValue = 1f;
+
+	public static SoundManager Instance => instance;
+
+	private void Awake()
+	{
+		if (instance == null)
+		{
+			Object.DontDestroyOnLoad(base.gameObject);
+			instance = this;
+			if (PlayerPrefs.HasKey("Currency"))
+			{
+				soundValue = PlayerPrefs.GetFloat("SoundValue");
+			}
+			else
+			{
+				Save();
+			}
+		}
+		else
+		{
+			UnityEngine.Object.Destroy(base.gameObject);
+		}
+	}
+
+	private void Start()
+	{
+		atSound = Resources.Load<AudioClip>("at");
+		tutSound = Resources.Load<AudioClip>("tut");
+		winSound = Resources.Load<AudioClip>("win");
+		loseSound = Resources.Load<AudioClip>("lose");
+		yesnoSound = Resources.Load<AudioClip>("yesno");
+		coinSound = Resources.Load<AudioClip>("coin");
+		menuSound = Resources.Load<AudioClip>("menu");
+		audiosrc = GetComponent<AudioSource>();
+	}
+
+	private void Update()
+	{
+		audiosrc.volume = soundValue;
+	}
+
+	public void Save()
+	{
+		PlayerPrefs.SetFloat("SoundValue", soundValue);
+	}
+
+	public static void PlaySound(string clip)
+	{
+		switch (clip)
+		{
+		case "at":
+			audiosrc.PlayOneShot(atSound);
+			break;
+		case "tut":
+			audiosrc.PlayOneShot(tutSound);
+			break;
+		case "win":
+			audiosrc.PlayOneShot(winSound);
+			break;
+		case "lose":
+			audiosrc.PlayOneShot(loseSound);
+			break;
+		case "yesno":
+			audiosrc.PlayOneShot(yesnoSound);
+			break;
+		case "coin":
+			audiosrc.PlayOneShot(coinSound);
+			break;
+		case "menu":
+			audiosrc.PlayOneShot(menuSound);
+			break;
+		}
+	}
+}
